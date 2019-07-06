@@ -21,8 +21,8 @@ uint8_t randByte()
 void pre_new(int width, int height, uint32_t *inPixelsPtr, uint32_t *outPixelsPtr);
 void pre_old(int width, int height, uint32_t *inPixelsPtr, uint32_t *outPixelsPtr);
 
-static int width = 2048;
-static int height = 2048;
+static int width = 2048*2;
+static int height = 2048*2;
 static NSMutableData *mInData = nil;
 static NSMutableData *mOutData = nil;
 
