@@ -29,8 +29,8 @@ inline
 uint32_t premultiply_c_inline(uint32_t c, uint32_t alpha)
 {
   // PRE = STRAIGHT * ALPHA
-  //c = (c * alpha + 127) / 255;
   c = (c * alpha + 127);
+  //c /= 255;
   c = ((c+1) + (c >> 8)) >> 8;
   return c;
 }
