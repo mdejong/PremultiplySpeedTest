@@ -1,8 +1,7 @@
 //
 //  PremultiplyOld.h
 //
-//  Util methods to premultiply and unpremultiply CoreGraphics
-//  premultiplied alpha pixel values.
+//  premultiply RGB pixel components by the A value
 
 #ifndef _PREMULTIPLY_HEADER_H
 #define _PREMULTIPLY_HEADER_H

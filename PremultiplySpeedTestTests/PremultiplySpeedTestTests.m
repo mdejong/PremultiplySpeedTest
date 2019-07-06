@@ -8,8 +8,6 @@
 
 #import <XCTest/XCTest.h>
 
-#import "Premultiply.h"
-
 @interface PremultiplySpeedTestTests : XCTestCase
 
 @end
@@ -22,6 +20,11 @@ uint8_t randByte()
 
 void pre_new(int width, int height, uint32_t *inPixelsPtr, uint32_t *outPixelsPtr);
 void pre_old(int width, int height, uint32_t *inPixelsPtr, uint32_t *outPixelsPtr);
+
+static int width = 2048;
+static int height = 2048;
+static NSMutableData *mInData = nil;
+static NSMutableData *mOutData = nil;
 
 @implementation PremultiplySpeedTestTests
 
@@ -38,35 +41,42 @@ void pre_old(int width, int height, uint32_t *inPixelsPtr, uint32_t *outPixelsPt
     // Use XCTAssert and related functions to verify your tests produce the correct results.
 }
 
+// Configure test case input and output buffers, this is so that the same
+// data is used as input to different implementations.
+
++ (void) setupInputOutputBuffers {
+  if (mInData == nil) {
+    mInData = [NSMutableData data];
+    [mInData setLength:(width * height * sizeof(uint32_t))];
+    
+    mOutData = [NSMutableData data];
+    [mOutData setLength:(width * height * sizeof(uint32_t))];
+    
+    uint32_t *inPixelsPtr = (uint32_t *) mInData.bytes;
+    uint32_t *outPixelsPtr = (uint32_t *) mOutData.bytes;
+    
+    srand((unsigned int)time(0));
+    
+    int offset = 0;
+    for (int y = 0; y < height; y++) {
+      for (int x = 0; x < width; x++) {
+        uint32_t R = randByte();
+        uint32_t G = randByte();
+        uint32_t B = randByte();
+        uint32_t A = randByte();
+        
+        uint32_t pixel = (A << 24) | (B << 16) | (G << 8) | R;
+        inPixelsPtr[offset++] = pixel;
+      }
+    }
+  }
+}
+
 - (void)testNewPremultPerf {
-  // Allocate 2D array of pixels, fill with random values
-  
-  int width = 2048;
-  int height = 2048;
-
-  NSMutableData *mInData = [NSMutableData data];
-  [mInData setLength:(width * height * sizeof(uint32_t))];
-
-  NSMutableData *mOutData = [NSMutableData data];
-  [mOutData setLength:(width * height * sizeof(uint32_t))];
+  [self.class setupInputOutputBuffers];
   
   uint32_t *inPixelsPtr = (uint32_t *) mInData.bytes;
   uint32_t *outPixelsPtr = (uint32_t *) mOutData.bytes;
-  
-  srand((unsigned int)time(0));
-  
-  int offset = 0;
-  for (int y = 0; y < height; y++) {
-    for (int x = 0; x < width; x++) {
-      uint32_t R = randByte();
-      uint32_t G = randByte();
-      uint32_t B = randByte();
-      uint32_t A = randByte();
-      
-      uint32_t pixel = (A << 24) | (B << 16) | (G << 8) | R;
-      inPixelsPtr[offset++] = pixel;
-    }
-  }
   
   [self measureBlock:^{
     pre_new(width, height, inPixelsPtr, outPixelsPtr);
@@ -74,34 +84,10 @@ void pre_old(int width, int height, uint32_t *inPixelsPtr, uint32_t *outPixelsPt
 }
 
 - (void)testOldPremultPerf {
-  // Allocate 2D array of pixels, fill with random values
-  
-  int width = 2048;
-  int height = 2048;
-  
-  NSMutableData *mInData = [NSMutableData data];
-  [mInData setLength:(width * height * sizeof(uint32_t))];
-  
-  NSMutableData *mOutData = [NSMutableData data];
-  [mOutData setLength:(width * height * sizeof(uint32_t))];
+  [self.class setupInputOutputBuffers];
   
   uint32_t *inPixelsPtr = (uint32_t *) mInData.bytes;
   uint32_t *outPixelsPtr = (uint32_t *) mOutData.bytes;
-  
-  srand((unsigned int)time(0));
-  
-  int offset = 0;
-  for (int y = 0; y < height; y++) {
-    for (int x = 0; x < width; x++) {
-      uint32_t R = randByte();
-      uint32_t G = randByte();
-      uint32_t B = randByte();
-      uint32_t A = randByte();
-      
-      uint32_t pixel = (A << 24) | (B << 16) | (G << 8) | R;
-      inPixelsPtr[offset++] = pixel;
-    }
-  }
   
   [self measureBlock:^{
     pre_old(width, height, inPixelsPtr, outPixelsPtr);
